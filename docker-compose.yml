@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: societyboard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: societyboard
+      POSTGRES_PASSWORD: societyboard
+      POSTGRES_DB: societyboard
+    ports:
+      - "5432:5432"
+    volumes:
+      - societyboard_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U societyboard"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: societyboard-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      # Overrides .env's localhost with the docker-compose service name,
+      # so the backend container can reach postgres by hostname.
+      DATABASE_URL: postgresql://societyboard:societyboard@postgres:5432/societyboard
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: societyboard-ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  # (left commented for now — running Ollama natively on your host is faster
+  #  than in Docker unless you have GPU passthrough set up. We'll wire this
+  #  in Step 3 when we build the LLM provider layer.)
+
+volumes:
+  societyboard_pgdata:
