@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from app.api.routes import flats, residents
 from app.config import settings
 from app.database import engine
 
@@ -50,6 +51,9 @@ def health_check():
     }
 
 
-# Routers get mounted here as they're built in later steps, e.g.:
-# from app.api.routes import residents
-# app.include_router(residents.router, prefix=settings.api_v1_prefix)
+app.include_router(flats.router, prefix=settings.api_v1_prefix)
+app.include_router(residents.router, prefix=settings.api_v1_prefix)
+
+# More routers get mounted here as they're built in later steps:
+# app.include_router(water_schedule.router, prefix=settings.api_v1_prefix)
+# app.include_router(service_requests.router, prefix=settings.api_v1_prefix)
