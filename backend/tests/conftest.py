@@ -1,14 +1,18 @@
 import datetime
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
-from app.database import Base
+from app.database import Base, get_db
+from app.main import app
 from app.models.building import Building
 from app.models.flat import Flat, FlatStatus
 from app.models.resident import Resident
 from app.models.water_schedule import WaterSchedule, WaterSource
+from app.services.llm import get_llm_provider
 
 
 @pytest.fixture()
@@ -17,7 +21,11 @@ def db():
     Postgres container being up. Good enough for testing our own query logic;
     Postgres-specific behavior (if any is added later) still needs the real
     thing via docker-compose."""
-    engine = create_engine("sqlite:///:memory:")
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
     Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine)()
     try:
@@ -56,3 +64,19 @@ def seeded(db):
     db.commit()
 
     return {"building": building, "flat": flat, "resident": resident}
+
+
+@pytest.fixture()
+def client(db):
+    """TestClient with the DB dependency overridden to use the in-memory
+    sqlite `db` fixture (instead of the real Postgres SessionLocal). Tests
+    that need a specific LLM response set `app.dependency_overrides[get_llm_provider]`
+    themselves before calling; this fixture always clears both overrides after."""
+
+    def override_get_db():
+        yield db
+
+    app.dependency_overrides[get_db] = override_get_db
+    yield TestClient(app)
+    app.dependency_overrides.pop(get_db, None)
+    app.dependency_overrides.pop(get_llm_provider, None)
