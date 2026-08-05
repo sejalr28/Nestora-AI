@@ -50,6 +50,8 @@ def health_check():
         "llm_provider": settings.llm_provider,
     }
 
+    
+
 
 app.include_router(buildings.router, prefix=settings.api_v1_prefix)
 app.include_router(flats.router, prefix=settings.api_v1_prefix)

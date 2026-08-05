@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     # --- App ---
     environment: str = "development"
     api_v1_prefix: str = "/api/v1"
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = "http://localhost:5174"
 
     # --- LLM provider selection (see services/llm/) ---
     llm_provider: str = "ollama"
