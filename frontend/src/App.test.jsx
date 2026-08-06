@@ -29,6 +29,32 @@ vi.mock("./api/flats", () => ({
   },
 }));
 
+// Required for Phase 8: "/" now renders DashboardHomePage, which calls
+// these three APIs (previously unused by any App.test.jsx route).
+vi.mock("./api/residents", () => ({
+  residentsApi: {
+    list: vi.fn().mockResolvedValue([]),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
+}));
+
+vi.mock("./api/vendors", () => ({
+  vendorsApi: {
+    list: vi.fn().mockResolvedValue([]),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
+}));
+
+vi.mock("./api/serviceRequests", () => ({
+  serviceRequestsApi: {
+    list: vi.fn().mockResolvedValue([]),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
+}));
+
 function renderAt(path) {
   return render(
     <MemoryRouter initialEntries={[path]}>
@@ -38,16 +64,14 @@ function renderAt(path) {
 }
 
 describe("App routing + layout", () => {
-  it("redirects the index route to Water Schedule", async () => {
+  it("renders the Dashboard Home page at the index route", async () => {
     renderAt("/");
-    // Water Schedule fetches on mount, so the heading appears after that
-    // resolves -- findByRole waits for it instead of asserting synchronously.
-    expect(await screen.findByRole("heading", { name: "Water Schedule" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
   });
 
-  it("renders all five nav links in the sidebar", async () => {
+  it("renders all six nav links in the sidebar", async () => {
     renderAt("/water-schedule");
-    for (const label of ["Water Schedule", "Buildings", "Vendors", "Residents", "Service Requests"]) {
+    for (const label of ["Dashboard", "Water Schedule", "Buildings", "Vendors", "Residents", "Service Requests"]) {
       expect(screen.getAllByRole("link", { name: label }).length).toBeGreaterThan(0);
     }
     // Let WaterSchedulePage's fetch-on-mount settle before the test ends,

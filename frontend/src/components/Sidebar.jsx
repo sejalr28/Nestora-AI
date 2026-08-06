@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 
 export const NAV_ITEMS = [
+  { to: "/", label: "Dashboard", end: true },
   { to: "/water-schedule", label: "Water Schedule" },
   { to: "/buildings", label: "Buildings" },
   { to: "/vendors", label: "Vendors" },
@@ -23,6 +24,7 @@ export function Sidebar({ onNavigate }) {
         <NavLink
           key={item.to}
           to={item.to}
+          end={item.end}
           onClick={onNavigate}
           className={({ isActive }) =>
             LINK_BASE +
