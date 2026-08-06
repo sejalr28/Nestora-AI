@@ -7,11 +7,12 @@ import BuildingsPage from "./pages/BuildingsPage";
 import VendorsPage from "./pages/VendorsPage";
 import ResidentsPage from "./pages/ResidentsPage";
 import ServiceRequestsPage from "./pages/ServiceRequestsPage";
+import AIAssistantPage from "./pages/AIAssistantPage";
 
 /**
  * Route table. DashboardLayout renders the sidebar/top bar once and every
- * child route below renders into its <Outlet />. "/" is now the real
- * Dashboard Home (Phase 8) instead of redirecting to Water Schedule.
+ * child route below renders into its <Outlet />. "/" is the real
+ * Dashboard Home (Phase 8). AI Assistant (Phase 9) is now a real page.
  * ComingSoon stays only for genuinely unknown routes (the "*" fallback).
  */
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
                 <Route path="/vendors" element={<VendorsPage />} />
                 <Route path="/residents" element={<ResidentsPage />} />
                 <Route path="/service-requests" element={<ServiceRequestsPage />} />
+                <Route path="/assistant" element={<AIAssistantPage />} />
                 <Route path="*" element={<ComingSoon label="Not found" phase="?" />} />
             </Route>
         </Routes>

@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api.routes import buildings, flats, residents, service_requests, vendors, water_schedule, whatsapp
+from app.api.routes import assistant, buildings, flats, residents, service_requests, vendors, water_schedule, whatsapp
 from app.config import settings
 from app.database import engine
 
@@ -50,9 +50,8 @@ def health_check():
         "llm_provider": settings.llm_provider,
     }
 
-    
 
-
+app.include_router(assistant.router, prefix=settings.api_v1_prefix)
 app.include_router(buildings.router, prefix=settings.api_v1_prefix)
 app.include_router(flats.router, prefix=settings.api_v1_prefix)
 app.include_router(residents.router, prefix=settings.api_v1_prefix)

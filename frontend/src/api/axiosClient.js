@@ -9,11 +9,11 @@ import axios from "axios";
  * exposes env vars prefixed with VITE_ to client code.
  */
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1",
-  timeout: 15000,
-  headers: {
-    "Content-Type": "application/json",
-  },
+    baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1",
+    timeout: 60000,
+    headers: {
+        "Content-Type": "application/json",
+    },
 });
 
 // Normalizes every failed request into a plain Error with a readable
@@ -21,13 +21,13 @@ export const apiClient = axios.create({
 // components can just do `catch (err) { setError(err.message) }` without
 // knowing anything about Axios's error shape.
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const detail = error.response?.data?.detail;
-    const message =
-      (typeof detail === "string" && detail) ||
-      error.message ||
-      "Something went wrong talking to the server.";
-    return Promise.reject(new Error(message));
-  }
+    (response) => response,
+    (error) => {
+        const detail = error.response?.data?.detail;
+        const message =
+            (typeof detail === "string" && detail) ||
+            error.message ||
+            "Something went wrong talking to the server.";
+        return Promise.reject(new Error(message));
+    }
 );
