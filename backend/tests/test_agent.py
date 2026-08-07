@@ -42,7 +42,8 @@ def test_agent_executes_tool_call_and_returns_final_reply(db, seeded):
     # special "tool" role or tool_call_id needed anymore
     second_call_roles = [m.role for m in provider.calls[1]]
     assert second_call_roles[-1] == "user"
-    assert "get_water_schedule" in provider.calls[1][-1].content
+    assert "Tool returned:" in provider.calls[1][-1].content
+    assert '"schedules"' in provider.calls[1][-1].content
 
 
 def test_agent_handles_model_wrapping_json_in_a_code_fence(db, seeded):

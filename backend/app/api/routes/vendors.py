@@ -5,18 +5,14 @@ from app.core.errors import not_found
 from app.database import get_db
 from app.models.vendor import Vendor
 from app.schemas.vendor import VendorCreate, VendorRead, VendorUpdate
+from app.services.core.vendors_service import list_vendors as _list_vendors
 
 router = APIRouter(prefix="/vendors", tags=["vendors"])
 
 
 @router.get("", response_model=list[VendorRead])
 def list_vendors(category: str | None = None, active_only: bool = True, db: Session = Depends(get_db)):
-    query = db.query(Vendor)
-    if category:
-        query = query.filter(Vendor.category == category)
-    if active_only:
-        query = query.filter(Vendor.is_active.is_(True))
-    return query.order_by(Vendor.category, Vendor.name).all()
+    return _list_vendors(db, category=category, active_only=active_only)
 
 
 @router.post("", response_model=VendorRead, status_code=201)
