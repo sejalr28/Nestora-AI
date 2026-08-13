@@ -54,6 +54,40 @@ def create_service_request(
     return ServiceRequestRead.model_validate(loaded).model_dump()
 
 
+def update_service_request(
+    db: Session,
+    request_id: int,
+    status: RequestStatus | str | None = None,
+    vendor_id: int | None = None,
+    assigned_slot: str | None = None,
+) -> dict | None:
+    """Used for both: assigning a vendor+slot, and marking a request done --
+    mirrors the assign()/complete() actions in the original SocietyBoard
+    prototype's RequestsPanel. Returns None if the request doesn't exist
+    (framework-free -- the caller, REST route or agent tool, decides how to
+    report that: an HTTPException for REST, a plain {"error": ...} dict for
+    an agent tool). Only fields explicitly passed (non-None) are updated --
+    None here means "leave unchanged," not "clear the field.\""""
+    request = db.get(ServiceRequest, request_id)
+    if not request:
+        return None
+
+    if isinstance(status, str):
+        status = RequestStatus(status)
+
+    if status is not None:
+        request.status = status
+    if vendor_id is not None:
+        request.vendor_id = vendor_id
+    if assigned_slot is not None:
+        request.assigned_slot = assigned_slot
+
+    db.commit()
+    db.refresh(request)
+    loaded = db.get(ServiceRequest, request_id, options=SERVICE_REQUEST_LOAD_OPTIONS)
+    return ServiceRequestRead.model_validate(loaded).model_dump()
+
+
 def count_active_requests_for_vendor(db: Session, vendor_id: int) -> int:
     """How many currently-assigned (in-progress) requests a vendor has --
     used by find_available_vendor to rank vendors by current capacity."""

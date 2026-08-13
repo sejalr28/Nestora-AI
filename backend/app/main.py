@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api.routes import assistant, buildings, flats, residents, service_requests, vendors, water_schedule, whatsapp
+from app.api.routes import assistant, buildings, flats, residents, service_requests, vendors, water_schedule, whatsapp, workflows
 from app.config import settings
 from app.database import engine
 
@@ -59,3 +59,4 @@ app.include_router(water_schedule.router, prefix=settings.api_v1_prefix)
 app.include_router(vendors.router, prefix=settings.api_v1_prefix)
 app.include_router(service_requests.router, prefix=settings.api_v1_prefix)
 app.include_router(whatsapp.router, prefix=settings.api_v1_prefix)
+app.include_router(workflows.router, prefix=settings.api_v1_prefix)

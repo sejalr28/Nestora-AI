@@ -4,6 +4,7 @@ from app.services.core.service_requests_service import (
     create_service_request,
     list_service_requests,
     resolve_flat_by_name,
+    update_service_request,
 )
 
 
@@ -53,3 +54,53 @@ def test_count_active_requests_for_vendor(db, seeded):
     db.commit()
 
     assert count_active_requests_for_vendor(db, vendor.id) == 1
+
+
+def test_update_service_request_assigns_vendor_and_slot(db, seeded):
+    from app.models.vendor import Vendor
+
+    vendor = Vendor(name="Ganesh Pipe Works", category="Plumber", phone_number="9000000000")
+    db.add(vendor)
+    db.commit()
+    db.refresh(vendor)
+
+    request = create_service_request(db, flat_id=seeded["flat"].id, category="Plumber")
+    updated = update_service_request(
+        db, request_id=request["id"], status="assigned", vendor_id=vendor.id, assigned_slot="Tomorrow 9-10 AM"
+    )
+
+    assert updated["status"] == "assigned"
+    assert updated["vendor"]["name"] == "Ganesh Pipe Works"
+    assert updated["assigned_slot"] == "Tomorrow 9-10 AM"
+
+
+def test_update_service_request_accepts_status_as_enum_or_string(db, seeded):
+    request = create_service_request(db, flat_id=seeded["flat"].id, category="Plumber")
+
+    updated = update_service_request(db, request_id=request["id"], status=RequestStatus.done)
+    assert updated["status"] == "done"
+
+    updated = update_service_request(db, request_id=request["id"], status="open")
+    assert updated["status"] == "open"
+
+
+def test_update_service_request_leaves_unspecified_fields_unchanged(db, seeded):
+    from app.models.vendor import Vendor
+
+    vendor = Vendor(name="Ganesh Pipe Works", category="Plumber", phone_number="9000000000")
+    db.add(vendor)
+    db.commit()
+    db.refresh(vendor)
+
+    request = create_service_request(db, flat_id=seeded["flat"].id, category="Plumber")
+    update_service_request(db, request_id=request["id"], status="assigned", vendor_id=vendor.id, assigned_slot="9 AM")
+
+    # Only marking done -- vendor/slot set earlier must survive untouched.
+    updated = update_service_request(db, request_id=request["id"], status="done")
+    assert updated["status"] == "done"
+    assert updated["vendor"]["name"] == "Ganesh Pipe Works"
+    assert updated["assigned_slot"] == "9 AM"
+
+
+def test_update_service_request_returns_none_for_unknown_id(db, seeded):
+    assert update_service_request(db, request_id=999999, status="done") is None

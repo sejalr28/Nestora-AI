@@ -3,12 +3,12 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import not_found
 from app.database import get_db
-from app.models.service_request import RequestStatus, ServiceRequest
+from app.models.service_request import RequestStatus
 from app.schemas.service_request import ServiceRequestCreate, ServiceRequestRead, ServiceRequestUpdate
 from app.services.core.service_requests_service import (
-    SERVICE_REQUEST_LOAD_OPTIONS,
     create_service_request as _create_service_request,
     list_service_requests as _list_service_requests,
+    update_service_request as _update_service_request,
 )
 
 router = APIRouter(prefix="/service-requests", tags=["service-requests"])
@@ -39,13 +39,13 @@ def update_service_request(request_id: int, payload: ServiceRequestUpdate, db: S
     """Used for both: the committee assigning a vendor+slot, and marking a
     request done -- mirrors the assign()/complete() actions in the original
     SocietyBoard prototype's RequestsPanel."""
-    request = db.get(ServiceRequest, request_id)
-    if not request:
+    result = _update_service_request(
+        db,
+        request_id=request_id,
+        status=payload.status,
+        vendor_id=payload.vendor_id,
+        assigned_slot=payload.assigned_slot,
+    )
+    if result is None:
         raise not_found("Service request", request_id)
-
-    for field, value in payload.model_dump(exclude_unset=True).items():
-        setattr(request, field, value)
-
-    db.commit()
-    db.refresh(request)
-    return db.get(ServiceRequest, request_id, options=SERVICE_REQUEST_LOAD_OPTIONS)
+    return result

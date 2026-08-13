@@ -8,6 +8,7 @@ export const NAV_ITEMS = [
     { to: "/residents", label: "Residents" },
     { to: "/service-requests", label: "Service Requests" },
     { to: "/assistant", label: "AI Assistant" },
+    { to: "/workflows", label: "Workflows" },
 ];
 
 const LINK_BASE =
