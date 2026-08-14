@@ -5,7 +5,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 from app.core.phone import normalize_phone
 from app.database import get_db
 from app.models.resident import Resident
-from app.services.agent.agent import SocietyAgent
+from app.services.agent.factory import RESIDENT_ROLE, get_agent
 from app.services.llm import get_llm_provider
 from app.services.llm.base import LLMProvider
 from app.services.whatsapp.onboarding import ONBOARDING_PROMPT, onboard_resident, parse_onboarding_message
@@ -26,6 +26,8 @@ async def whatsapp_webhook(
     No outbound REST call needed for this reply-to-inbound flow.
 
     Routing: unknown phone number -> onboarding; known resident -> agent.
+    WhatsApp is always pinned to the resident role via the agent factory --
+    there is no way for a WhatsApp message to select the committee role.
     """
     form = await request.form()
     from_number = normalize_phone(str(form.get("From", "")))
@@ -40,7 +42,7 @@ async def whatsapp_webhook(
         else:
             _, reply_text = onboard_resident(db, from_number, parsed)
     else:
-        agent = SocietyAgent(provider)
+        agent = get_agent(RESIDENT_ROLE, provider)
         reply_text = agent.run(db, resident, body)
 
     twiml = MessagingResponse()
