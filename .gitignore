@@ -3,29 +3,58 @@ __pycache__/
 *.py[cod]
 *.pyo
 
-# Virtual Environment
+# Python virtual environments
 .venv/
 venv/
+env/
 
 # Pytest
 .pytest_cache/
+.coverage
+htmlcov/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
 
 # VS Code
 .vscode/
 
-# Environment
-.env
-
 # Logs
 *.log
 
-# Build
+# Build / distribution
 dist/
 build/
+*.egg-info/
+
+# Node / React frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Temporary
+# Temporary files
 structure.txt
+*.tmp
+*.temp
+
+# Python coverage / tooling
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Database / local files
+*.sqlite
+*.sqlite3
+
+# IDE
+.idea/
